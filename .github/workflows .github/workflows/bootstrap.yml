@@ -1,0 +1,43 @@
+name: bootstrap
+on: [push, workflow_dispatch]
+permissions:
+  contents: write
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          set -e
+          ZIP=$(ls *.zip 2>/dev/null | head -1 || true)
+          if [ -z "$ZIP" ]; then echo "no zip found, skip"; exit 0; fi
+          python3 - <<'PYEOF'
+          import zipfile, glob, os
+          for zp in glob.glob('*.zip'):
+              z = zipfile.ZipFile(zp)
+              for i in z.infolist():
+                  name = i.filename
+                  if not (i.flag_bits & 0x800):
+                      try:
+                          name = name.encode('cp437').decode('utf-8')
+                      except Exception:
+                          pass
+                  name = os.path.normpath(name)
+                  if not name or name in ('.', '..') or name.startswith('..'):
+                      continue
+                  if i.is_dir() or name.endswith('/'):
+                      os.makedirs(name, exist_ok=True)
+                      continue
+                  d = os.path.dirname(name)
+                  if d:
+                      os.makedirs(d, exist_ok=True)
+                  with z.open(i) as f, open(name, 'wb') as out:
+                      out.write(f.read())
+              os.remove(zp)
+          print('extract done')
+          PYEOF
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "bootstrap: extract source" || exit 0
+          git push
