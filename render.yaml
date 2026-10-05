@@ -1,0 +1,9 @@
+# Render 一键部署配置（免费层）
+# 用法：GitHub 建仓 → push 本目录 → Render 控制台 New → Blueprint → 选该仓库
+services:
+  - type: web
+    name: tugu-chat
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /

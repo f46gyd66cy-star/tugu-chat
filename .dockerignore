@@ -1,0 +1,9 @@
+node_modules
+.next
+.git
+.zscripts
+db/*.db*
+mini-services
+*.log
+tests
+docs

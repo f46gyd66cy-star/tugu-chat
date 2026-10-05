@@ -1,0 +1,27 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:../db/custom.db"
+}
+
+// 匿名聊天消息：type = "text" | "image"
+// 图片以原始字节存于 data 字段（不做任何压缩/缩放）
+model Message {
+  id        String   @id @default(cuid())
+  cid       String?
+  name      String
+  color     String
+  type      String
+  text      String?
+  mime      String?
+  size      Int?
+  width     Int?
+  height    Int?
+  data      Bytes?
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}
